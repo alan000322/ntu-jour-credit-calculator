@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+    <title>NTU Journalism Credit Calculator</title>
+</head>
+
+<body>
+    <div id="app" class="container mt-5">
+        <h1 class="mb-4 text-center">新聞所懶人版學分計算機</h1>
+        <div class="card bg-danger text-light p-2">請注意，仍以實際官方訂定為主，此計算機僅供參考。</div>
+        <div class="mb-3">
+            <label for="systemSelect" class="form-label">
+                選擇學制：{{selectedSystem}}
+                <p v-if="selectedSystem"></p>
+                <p v-else class="text-danger fs-4">請先選擇學制，否則計算失真</p>
+            </label>
+            <select v-model="selectedSystem" id="systemSelect" class="form-select">
+                <option value="" disabled>報導or論文</option>
+                <option value="報導組 - 文字深度報導、多媒體報導" selected>報導組 - 文字深度報導、多媒體報導</option>
+                <option value="報導組 - 影像深度報導">報導組 - 影像深度報導</option>
+                <option value="學術論文組">學術論文組</option>
+            </select>
+        </div>
+        <div class="row mb-3 d-flex justify-content-center">
+            <div class="card col-md-6 p-3 bg-light">
+                <p>總學分：{{ totalCredits }}</p>
+                <p>還差學分：{{ remainingCredits }}</p>
+
+                <p v-if="isRuleFulfilled" class="text-danger text-success">達畢業門檻</p>
+                <p v-else class="text-danger text-center"><b>⚠️未達畢業門檻⚠️</b></p>
+                細節：
+
+
+                <li v-show="!totalCreditsError">學分不足33學分</li>
+                <li v-show="!isTextReportError">沒修完採訪寫作一、二</li>
+                <li v-show="!isVideoReportError">沒修完影像報導一、二</li>
+                <li v-show="!isBEESUANReportError">必選5選2/5選3未達成</li>
+                <!-- <p v-if="totalCreditsError"></p> -->
+                <!-- <p v-else><li>{{totalCreditsError}}學分不足33學分</li></p> -->
+            </div>
+        </div>
+        <button class="btn btn-secondary" @click="resetSelection">重置選擇</button>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">選擇課程：</label>
+                    <div v-if="course.status === 'y'" v-for="course in courses" :key="course.className"
+                        class="form-check">
+                        <input type="checkbox" class="form-check-input" :id="course.className" :value="course"
+                            v-model="selectedCourses">
+                        <label class="form-check-label" :for="course.className">
+                            <span v-if="course.type==='必修課'" class="badge bg-primary">{{course.type}}</span>
+                            <span v-else-if="course.type==='必選課'" class="badge bg-success">{{course.type}}</span>
+                            <span v-else class="badge bg-secondary">{{course.type}}</span>
+                            {{ course.className }} ({{ course.credit }}
+                            學分)
+                        </label>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <h2>已選課程</h2>
+                    <div v-for="course in selectedCourses" :key="course.className" class="form-check">
+                        <span v-if="course.type==='必修課'" class="badge bg-primary">{{course.type}}</span>
+                        <span v-else-if="course.type==='必選課'" class="badge bg-success">{{course.type}}</span>
+                        <span v-else class="badge bg-secondary">{{course.type}}</span>
+                        {{ course.className }} ({{ course.credit }}
+                        學分)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                selectedSystem: '',
+                courses: [{
+                        className: '新聞法律與倫理',
+                        type: '必修課',
+                        status: "y",
+                        credit: 3,
+                        subtype: '必修課',
+                    },
+                    {
+                        className: '傳播研究方法',
+                        type: '必修課',
+                        status: "y",
+                        credit: 3,
+                        subtype: '必修課',
+                    },
+                    {
+                        className: '傳播理論',
+                        type: '必修課',
+                        status: "y",
+                        credit: 3,
+                        subtype: '必修課',
+                    },
+                    {
+                        className: '採訪寫作一',
+                        type: '必選課',
+                        status: "y",
+                        credit: 3,
+                        subtype: '必選課',
+                    },
+                    {
+                        className: '採訪寫作二',
+                        type: '必選課',
+                        status: "y",
+                        credit: 3,
+                        subtype: '必選課',
+                    },
+                    {
+                        className: '新聞資訊編輯',
+                        type: '必選課',
+                        status: "y",
+                        credit: 3,
+                        subtype: '必選課',
+                    },
+                    {
+                        className: '影像報導一',
+                        type: '必選課',
+                        status: "y",
+                        credit: 3,
+                        subtype: '必選課',
+                    },
+                    {
+                        className: '影像報導二',
+                        type: '必選課',
+                        status: "y",
+                        credit: 3,
+                        subtype: '必選課',
+                    },
+                    {
+                        className: "質化研究方法",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "資訊傳播政策專題",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "媒介社會學",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "傳播政治經濟學",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "新媒體研究",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "媒介心理學",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "社群媒介輿論分析",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "社群媒體與社會網絡分析",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "網路時代的政治傳播",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "數位新聞學研究",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "多元文化論與傳播研究",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "媒體公民意識"
+                    },
+                    {
+                        className: "新聞媒體與八卦文化",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "媒體公民意識"
+                    },
+                    {
+                        className: "公共傳播專題",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "媒體公民意識"
+                    },
+                    {
+                        className: "新聞史專題",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "媒體公民意識"
+                    },
+                    {
+                        className: "台灣報人史專題",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "媒體公民意識"
+                    },
+                    {
+                        className: "公民新聞專題",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "媒體公民意識"
+                    },
+                    {
+                        className: "新聞產業創新",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "媒體公民意識"
+                    },
+                    {
+                        className: "新聞與政治",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "媒體公民意識"
+                    },
+                    {
+                        className: "全球化與傳播",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "國際視野"
+                    },
+                    {
+                        className: "資訊科技與資訊社會",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "國際視野"
+                    },
+                    {
+                        className: "國際政治與兩岸關係專題",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "國際視野"
+                    },
+                    {
+                        className: "兩岸三地新聞專題",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "國際視野"
+                    },
+                    {
+                        className: "東亞新聞專題",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "國際視野"
+                    },
+                    {
+                        className: "網絡新聞學",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "國際視野"
+                    },
+                    {
+                        className: "影像報導三",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "電視新聞",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "電視新聞雜誌",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "多媒體創作",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "新聞資訊視覺化",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "新媒體與新聞報導",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "新聞資料分析",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "網頁設計與敘事",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "新聞資料處理與視覺呈現",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "設計整合",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "社會科學程式設計",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "數位智能"
+                    },
+                    {
+                        className: "雜誌企劃實務",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "英文新聞寫作",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "調查報導專題",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "新聞攝影",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "媒體實習",
+                        type: "選修課",
+                        status: "n",
+                        credit: 2,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "科學傳播",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "環境傳播",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "醫療新聞學",
+                        type: "選修課",
+                        status: "n",
+                        credit: 2,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "公共關係與新聞報導",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "虛擬/擴增實境在新聞與數位媒體上的應用",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "獨立媒體創作",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "財經新聞寫作",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "科學報導與科學文化",
+                        type: "選修課",
+                        status: "n",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "其他系所（課程）1",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "無"
+                    },
+                    {
+                        className: "其他系所（課程）2",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "無"
+                    },
+                    {
+                        className: "其他系所（課程）3",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "無"
+                    },
+                    {
+                        className: "其他系所（課程）4",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "無"
+                    },
+                    {
+                        className: "其他系所（課程）1",
+                        type: "選修課",
+                        status: "y",
+                        credit: 2,
+                        subtype: "無"
+                    },
+                    {
+                        className: "其他系所（課程）2",
+                        type: "選修課",
+                        status: "y",
+                        credit: 2,
+                        subtype: "無"
+                    },
+                    {
+                        className: "其他系所（課程）3",
+                        type: "選修課",
+                        status: "y",
+                        credit: 2,
+                        subtype: "無"
+                    },
+                    {
+                        className: "其他系所（課程）4",
+                        type: "選修課",
+                        status: "y",
+                        credit: 2,
+                        subtype: "無"
+                    }
+                ],
+                selectedCourses: [],
+                text_report_error: '',
+                video_report_error: '',
+                thesis_error: '',
+            },
+            computed: {
+                totalCredits() {
+                    let total = 0;
+                    this.selectedCourses.forEach(course => {
+                        total += course.credit;
+                    });
+                    return total;
+                },
+                remainingCredits() {
+                    return 33 - this.totalCredits;
+                },
+                isRuleFulfilled() {
+                    if (this.selectedSystem === '報導組 - 文字深度報導、多媒體報導') {
+                        if (
+                            this.totalCredits >= 33 &&
+                            this.selectedCourses.some(course => course.className === '採訪寫作一') &&
+                            this.selectedCourses.some(course => course.className === '採訪寫作二') &&
+                            this.selectedCourses.filter(course => course.type === '必選課').length >= 3 &&
+                            this.selectedCourses.filter(course => course.type === '必修課').length == 3
+                        ) {
+                            return true;
+                        }
+                    } else if (this.selectedSystem === '報導組 - 影像深度報導') {
+                        if (
+                            this.totalCredits >= 33 &&
+                            this.selectedCourses.some(course => course.className === '影像報導一') &&
+                            this.selectedCourses.some(course => course.className === '影像報導二') &&
+                            this.selectedCourses.filter(course => course.type === '必選課').length >= 3 &&
+                            this.selectedCourses.filter(course => course.type === '必修課').length == 3
+                        ) {
+                            return true;
+                        }
+                    } else if (this.selectedSystem === '學術論文組') {
+
+                        const mediaAwarenessCourses = this.selectedCourses.filter(course => course.subtype ===
+                            '媒體公民意識');
+                        const theoryMethodCourses = this.selectedCourses.filter(course => course.subtype ===
+                            '理論/方法');
+                        const internationalCourses = this.selectedCourses.filter(course => course.subtype ===
+                            '國際視野');
+
+                        if (
+                            this.selectedCourses.length >= 5 &&
+                            this.selectedCourses.filter(course => course.type === '必選課').length >= 2 &&
+                            this.selectedCourses.filter(course => course.type === '必修課').length == 3 &&
+                            (mediaAwarenessCourses.length + theoryMethodCourses.length + theoryMethodCourses.length >= 3)
+
+                        ) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                totalCreditsError() {
+                    if (this.totalCredits >= 33) {
+                        return true;
+                    }
+                    return false;
+                },
+                isTextReportError() {
+                    if (this.selectedSystem === '報導組 - 文字深度報導、多媒體報導') {
+                        if (
+                            this.selectedCourses.some(course => course.className === '採訪寫作一') &&
+                            this.selectedCourses.some(course => course.className === '採訪寫作二')
+                        ) {
+                            return true;
+                        } else return false
+                    } else return true;
+                },
+                isVideoReportError() {
+                    if (this.selectedSystem === '報導組 - 影像深度報導') {
+                        if (
+                            this.selectedCourses.some(course => course.className === '影像報導一') &&
+                            this.selectedCourses.some(course => course.className === '影像報導二')
+                        ) {
+                            return true;
+                        } else return false
+                    } else return true;
+                },
+                isBEESUANReportError() {
+                    if (this.selectedSystem === '報導組 - 文字深度報導、多媒體報導') {
+                        if (
+                            this.selectedCourses.filter(course => course.type === '必選課').length >= 3
+                        ) {
+                            return true;
+                        } else return false
+                    } else if (this.selectedSystem === '報導組 - 影像深度報導') {
+                        if (
+                            this.selectedCourses.filter(course => course.type === '必選課').length >= 3
+                        ) {
+                            return true;
+                        } else return false
+                    } else if (this.selectedSystem === '學術論文組') {
+                        if (
+                            this.selectedCourses.filter(course => course.type === '必選課').length >= 2
+                        ) {
+                            return true;
+                        } else return false
+}
+                    
+                    else return true;
+                },
+            },
+            methods: {
+                // Other methods...
+                selectCourse(course) {
+                    this.selectedCourses.push(course);
+                },
+                deselectCourse(course) {
+                    const index = this.selectedCourses.indexOf(course);
+                    if (index > -1) {
+                        this.selectedCourses.splice(index, 1);
+                    }
+                },
+                resetSelection() {
+                    this.selectedCourses = [];
+                    this.selectedSystem = '';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
