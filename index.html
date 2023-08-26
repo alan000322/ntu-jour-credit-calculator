@@ -16,12 +16,10 @@
 <body>
     <div id="app" class="container mt-5">
         <h1 class="mb-4 text-center">新聞所懶人版學分計算機</h1>
-        <div class="card bg-danger text-light p-2">請注意，仍以實際官方訂定為主，此計算機僅供參考。</div>
-        <div class="mb-3">
-            <label for="systemSelect" class="form-label">
-                選擇學制：{{selectedSystem}}
-                <p v-if="selectedSystem"></p>
-                <p v-else class="text-danger fs-4">請先選擇學制，否則計算失真</p>
+        <div class="card bg-danger text-light p-2 my-4">請注意，仍以實際官方訂定為主，此計算機僅供參考。</div>
+        <div class="my-4">
+            <label for="systemSelect" class="form-label fs-5">
+                請先選擇學制：
             </label>
             <select v-model="selectedSystem" id="systemSelect" class="form-select">
                 <option value="" disabled>報導or論文</option>
@@ -30,53 +28,64 @@
                 <option value="學術論文組">學術論文組</option>
             </select>
         </div>
-        <div class="row mb-3 d-flex justify-content-center">
-            <div class="card col-md-6 p-3 bg-light">
-                <p>總學分：{{ totalCredits }}</p>
-                <p>還差學分：{{ remainingCredits }}</p>
-
-                <p v-if="isRuleFulfilled" class="text-danger text-success">達畢業門檻</p>
-                <p v-else class="text-danger text-center"><b>⚠️未達畢業門檻⚠️</b></p>
-                細節：
-
-
-                <li v-show="!totalCreditsError">學分不足33學分</li>
-                <li v-show="!isTextReportError">沒修完採訪寫作一、二</li>
-                <li v-show="!isVideoReportError">沒修完影像報導一、二</li>
-                <li v-show="!isBEESUANReportError">必選5選2/5選3未達成</li>
-                <!-- <p v-if="totalCreditsError"></p> -->
-                <!-- <p v-else><li>{{totalCreditsError}}學分不足33學分</li></p> -->
+        <div class="row" v-show="selectedSystem!=''">
+            <div class="row mb-3 d-flex justify-content-center">
+                <div class="col-md-4 d-flex justify-content-center align-items-center">
+                    <h1 class="fw-bold text-danger" style="font-size: 50px;">總學分: {{ totalCredits }}<br>還差學分：{{ remainingCredits }}</h1>
+                </div>
+                <div class="col-md-4 d-flex justify-content-center align-items-center">
+                    <h1 v-if="isRuleFulfilled" class="text-success">達畢業門檻</h1>
+                    <h1 v-else class="text-danger text-center"><b>⚠️未達畢業門檻⚠️</b></h1>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 bg-light" v-show="!totalCreditsError || !isBEESIOUError || !isTextReportError || !isVideoReportError || !isBEESUANReportError || !specificClassError">    
+                        <span>未達畢業門檻原因：</span>
+                        <li v-show="!totalCreditsError">學分<b>不足33學分</b></li>
+                        <li v-show="!isBEESIOUError"><span class="text-primary">必修課</span>未完成</li>
+                        <li v-show="!isTextReportError">沒修完<span class="text-success">採訪寫作一、二</span></li>
+                        <li v-show="!isVideoReportError">沒修完<span class="text-success">影像報導一、二</span></li>
+                        <li v-show="!isBEESUANReportError"><span class="text-success">必選課</span>5選2/5選3未達成</li>
+                        <li v-show="!specificClassError"><span class="text-secondary">選修課</span>須修三門「理論/方法」、「媒體公民意識」、「國際視野」類別內的課。</li>
+                        <!-- <p v-if="totalCreditsError"></p> -->
+                        <!-- <p v-else><li>{{totalCreditsError}}學分不足33學分</li></p> -->
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-secondary mt-4 text-end" @click="resetSelection">重置選擇</button>
+                    </div>
+                    
+            
+                </div>
             </div>
-        </div>
-        <button class="btn btn-secondary" @click="resetSelection">重置選擇</button>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label class="form-label">選擇課程：</label>
-                    <div v-if="course.status === 'y'" v-for="course in courses" :key="course.className"
-                        class="form-check">
-                        <input type="checkbox" class="form-check-input" :id="course.className" :value="course"
-                            v-model="selectedCourses">
-                        <label class="form-check-label" :for="course.className">
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>課程清單</h2>
+                    <div class="mb-3">
+                        <label class="form-label"></label>
+                        <div v-if="course.status === 'y'" v-for="course in courses" :key="course.className"
+                            class="form-check">
+                            <input type="checkbox" class="form-check-input" :id="course.className" :value="course"
+                                v-model="selectedCourses">
+                            <label class="form-check-label" :for="course.className">
+                                <span v-if="course.type==='必修課'" class="badge bg-primary">{{course.type}}</span>
+                                <span v-else-if="course.type==='必選課'" class="badge bg-success">{{course.type}}</span>
+                                <span v-else class="badge bg-secondary">{{course.type}}</span>
+                                {{ course.className }} ({{ course.credit }}
+                                學分)
+                            </label>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h2>已選課程</h2>
+                        <div v-for="course in selectedCourses" :key="course.className" class="form-check">
                             <span v-if="course.type==='必修課'" class="badge bg-primary">{{course.type}}</span>
                             <span v-else-if="course.type==='必選課'" class="badge bg-success">{{course.type}}</span>
                             <span v-else class="badge bg-secondary">{{course.type}}</span>
                             {{ course.className }} ({{ course.credit }}
                             學分)
-                        </label>
-
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <h2>已選課程</h2>
-                    <div v-for="course in selectedCourses" :key="course.className" class="form-check">
-                        <span v-if="course.type==='必修課'" class="badge bg-primary">{{course.type}}</span>
-                        <span v-else-if="course.type==='必選課'" class="badge bg-success">{{course.type}}</span>
-                        <span v-else class="badge bg-secondary">{{course.type}}</span>
-                        {{ course.className }} ({{ course.credit }}
-                        學分)
+                        </div>
                     </div>
                 </div>
             </div>
@@ -485,56 +494,56 @@
                         subtype: "專業實作"
                     },
                     {
-                        className: "其他系所（課程）1",
+                        className: "其他系所（課程3學分）1",
                         type: "選修課",
                         status: "y",
                         credit: 3,
                         subtype: "無"
                     },
                     {
-                        className: "其他系所（課程）2",
+                        className: "其他系所（課程3學分）2",
                         type: "選修課",
                         status: "y",
                         credit: 3,
                         subtype: "無"
                     },
                     {
-                        className: "其他系所（課程）3",
+                        className: "其他系所（課程3學分）3",
                         type: "選修課",
                         status: "y",
                         credit: 3,
                         subtype: "無"
                     },
                     {
-                        className: "其他系所（課程）4",
+                        className: "其他系所（課程3學分）4",
                         type: "選修課",
                         status: "y",
                         credit: 3,
                         subtype: "無"
                     },
                     {
-                        className: "其他系所（課程）1",
+                        className: "其他系所（課程2學分）1",
                         type: "選修課",
                         status: "y",
                         credit: 2,
                         subtype: "無"
                     },
                     {
-                        className: "其他系所（課程）2",
+                        className: "其他系所（課程2學分）2",
                         type: "選修課",
                         status: "y",
                         credit: 2,
                         subtype: "無"
                     },
                     {
-                        className: "其他系所（課程）3",
+                        className: "其他系所（課程2學分）3",
                         type: "選修課",
                         status: "y",
                         credit: 2,
                         subtype: "無"
                     },
                     {
-                        className: "其他系所（課程）4",
+                        className: "其他系所（課程2學分）4",
                         type: "選修課",
                         status: "y",
                         credit: 2,
@@ -555,7 +564,9 @@
                     return total;
                 },
                 remainingCredits() {
-                    return 33 - this.totalCredits;
+                    let result = 33 - this.totalCredits;
+                    if (result < 0 ) result = 0;
+                    return result;
                 },
                 isRuleFulfilled() {
                     if (this.selectedSystem === '報導組 - 文字深度報導、多媒體報導') {
@@ -588,10 +599,11 @@
                             '國際視野');
 
                         if (
-                            this.selectedCourses.length >= 5 &&
+                            this.totalCredits >= 33 &&
                             this.selectedCourses.filter(course => course.type === '必選課').length >= 2 &&
                             this.selectedCourses.filter(course => course.type === '必修課').length == 3 &&
-                            (mediaAwarenessCourses.length + theoryMethodCourses.length + theoryMethodCourses.length >= 3)
+                            (mediaAwarenessCourses.length + theoryMethodCourses.length + theoryMethodCourses
+                                .length >= 3)
 
                         ) {
                             return true;
@@ -644,22 +656,42 @@
                         ) {
                             return true;
                         } else return false
-}
-                    
-                    else return true;
+                    } else return true;
                 },
+                isBEESIOUError() {
+                    if ( this.selectedCourses.filter(course => course.type === '必修課').length >= 3 ) {
+                        return true;
+                    } else return false
+                },
+                specificClassError() {
+                    if (this.selectedSystem === '學術論文組') {
+                        const mediaAwarenessCourses = this.selectedCourses.filter(course => course.subtype ===
+                            '媒體公民意識');
+                        const theoryMethodCourses = this.selectedCourses.filter(course => course.subtype ===
+                            '理論/方法');
+                        const internationalCourses = this.selectedCourses.filter(course => course.subtype ===
+                            '國際視野');
+                        if ( mediaAwarenessCourses.length + theoryMethodCourses.length + theoryMethodCourses
+                            .length >= 3 ) { return true; }
+                        else return false;
+                    } else return true;
+                }
             },
             methods: {
                 // Other methods...
-                selectCourse(course) {
-                    this.selectedCourses.push(course);
-                },
-                deselectCourse(course) {
-                    const index = this.selectedCourses.indexOf(course);
-                    if (index > -1) {
-                        this.selectedCourses.splice(index, 1);
-                    }
-                },
+                // selectCourse(course) {
+                //     if (this.selectedSystem === '') {
+                //         alert('請先選擇學制');
+                //         return;
+                //     }
+                //     else this.selectedCourses.push(course);
+                // },
+                // deselectCourse(course) {
+                //     const index = this.selectedCourses.indexOf(course);
+                //     if (index > -1) {
+                //         this.selectedCourses.splice(index, 1);
+                //     }
+                // },
                 resetSelection() {
                     this.selectedCourses = [];
                     this.selectedSystem = '';
