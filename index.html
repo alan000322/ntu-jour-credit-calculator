@@ -16,7 +16,7 @@
 <body>
     <div id="app" class="container mt-5">
         <h1 class="mb-4 text-center fs-1">新聞所懶人版學分計算機</h1>
-        <div class="card bg-danger text-light p-2 my-4">請注意，仍以實際官方訂定為主，此計算機僅供參考。</div>
+        <div class="card bg-danger text-light p-2 my-4">請注意，仍以實際所方訂定為主，此計算機僅供參考。</div>
         <div class="my-4">
             <label for="systemSelect" class="form-label fs-5">
                 請先選擇學制：
@@ -42,9 +42,9 @@
                         <span>未達畢業門檻原因：</span>
                         <li v-show="!totalCreditsError">學分<b>不足33學分</b></li>
                         <li v-show="!isBEESIOUError"><span class="text-primary">必修課</span>未完成</li>
-                        <li v-show="!isTextReportError">沒修完<span class="text-success">採訪寫作一、二</span></li>
-                        <li v-show="!isVideoReportError">沒修完<span class="text-success">影像報導一、二</span></li>
-                        <li v-show="!isBEESUANReportError"><span class="text-success">必選課</span>5選2/5選3未達成</li>
+                        <li v-show="!isTextReportError">沒修完<span class="text-success">採訪寫作一或二</span></li>
+                        <li v-show="!isVideoReportError">沒修完<span class="text-success">影像報導一或二</span></li>
+                        <li v-show="!isBEESUANReportError"><span class="text-success">必選課</span>5選2 / 5選3未達成</li>
                         <li v-show="!specificClassError"><span class="text-secondary">選修課</span>須修三門「理論/方法」、「媒體公民意識」、「國際視野」類別內的課。</li>
                         <!-- <p v-if="totalCreditsError"></p> -->
                         <!-- <p v-else><li>{{totalCreditsError}}學分不足33學分</li></p> -->
@@ -194,6 +194,13 @@
                     },
                     {
                         className: "媒介心理學",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "理論/方法"
+                    },
+                    {
+                        className: "傳播與文化研究專題",
                         type: "選修課",
                         status: "y",
                         credit: 3,
@@ -425,6 +432,13 @@
                     },
                     {
                         className: "新聞攝影",
+                        type: "選修課",
+                        status: "y",
+                        credit: 3,
+                        subtype: "專業實作"
+                    },
+                    {
+                        className: "數位創新與媒體管理",
                         type: "選修課",
                         status: "y",
                         credit: 3,
