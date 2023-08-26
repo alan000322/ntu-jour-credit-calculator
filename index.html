@@ -15,7 +15,7 @@
 
 <body>
     <div id="app" class="container mt-5">
-        <h1 class="mb-4 text-center">新聞所懶人版學分計算機</h1>
+        <h1 class="mb-4 text-center fs-1">新聞所懶人版學分計算機</h1>
         <div class="card bg-danger text-light p-2 my-4">請注意，仍以實際官方訂定為主，此計算機僅供參考。</div>
         <div class="my-4">
             <label for="systemSelect" class="form-label fs-5">
@@ -31,7 +31,7 @@
         <div class="row" v-show="selectedSystem!=''">
             <div class="row mb-3 d-flex justify-content-center">
                 <div class="col-md-4 d-flex justify-content-center align-items-center">
-                    <h1 class="fw-bold text-danger" style="font-size: 50px;">總學分: {{ totalCredits }}<br>還差學分：{{ remainingCredits }}</h1>
+                    <h1 class="fw-bold text-danger">總學分: {{ totalCredits }}<br>還差學分：{{ remainingCredits }}</h1>
                 </div>
                 <div class="col-md-4 d-flex justify-content-center align-items-center">
                     <h1 v-if="isRuleFulfilled" class="text-success">達畢業門檻</h1>
