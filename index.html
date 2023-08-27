@@ -16,7 +16,7 @@
 <body>
     <div id="app" class="container mt-5">
         <h1 class="mb-4 text-center fs-1">新聞所懶人版學分計算機</h1>
-        <div class="card bg-danger text-light p-2 my-4">請注意，仍以實際所方訂定為主，此計算機僅供參考。</div>
+        <div class="card border-danger text-danger p-2 my-4">請注意，仍以實際所方訂定為主，此計算機僅供參考。如果有錯誤歡迎指正！</div>
         <div class="my-4">
             <label for="systemSelect" class="form-label fs-5">
                 請先選擇學制：
@@ -29,8 +29,8 @@
             </select>
         </div>
         <div class="row" v-show="selectedSystem!=''">
-            <div class="row mb-3 d-flex justify-content-center">
-                <div class="col-md-4 d-flex justify-content-center align-items-center">
+            <div class="row my-3 d-flex justify-content-center sticky-top bg-white">
+                <div class="col-md-4 mt-2 d-flex justify-content-center align-items-center">
                     <h1 class="fw-bold text-danger">總學分: {{ totalCredits }}<br>還差學分：{{ remainingCredits }}</h1>
                 </div>
                 <div class="col-md-4 d-flex justify-content-center align-items-center">
@@ -58,6 +58,20 @@
             </div>
             <div class="row">
                 <div class="col-md-6">
+                    <div class="mb-3">
+                        <h2>已選課程</h2>
+                        <div v-for="course in selectedCourses" :key="course.className" class="form-check">
+                            <span v-if="course.type==='必修課'" class="badge bg-primary">{{course.type}}</span>
+                            <span v-else-if="course.type==='必選課'" class="badge bg-success">{{course.type}}</span>
+                            <span v-else class="badge bg-secondary">{{course.type}}</span>
+                            <span class="badge rounded-pill bg-light text-dark">{{course.subtype}}</span>
+                            {{ course.className }} ({{ course.credit }} 
+                            學分)
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
                     <h2>課程清單</h2>
                     <div class="mb-3">
                         <label class="form-label"></label>
@@ -69,6 +83,7 @@
                                 <span v-if="course.type==='必修課'" class="badge bg-primary">{{course.type}}</span>
                                 <span v-else-if="course.type==='必選課'" class="badge bg-success">{{course.type}}</span>
                                 <span v-else class="badge bg-secondary">{{course.type}}</span>
+                                <span class="badge rounded-pill bg-light text-dark">{{course.subtype}}</span>
                                 {{ course.className }} ({{ course.credit }}
                                 學分)
                             </label>
@@ -76,18 +91,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <h2>已選課程</h2>
-                        <div v-for="course in selectedCourses" :key="course.className" class="form-check">
-                            <span v-if="course.type==='必修課'" class="badge bg-primary">{{course.type}}</span>
-                            <span v-else-if="course.type==='必選課'" class="badge bg-success">{{course.type}}</span>
-                            <span v-else class="badge bg-secondary">{{course.type}}</span>
-                            {{ course.className }} ({{ course.credit }}
-                            學分)
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
 
@@ -106,56 +110,56 @@
                         type: '必修課',
                         status: "y",
                         credit: 3,
-                        subtype: '必修課',
+                        subtype: '',
                     },
                     {
                         className: '傳播研究方法',
                         type: '必修課',
                         status: "y",
                         credit: 3,
-                        subtype: '必修課',
+                        subtype: '',
                     },
                     {
                         className: '傳播理論',
                         type: '必修課',
                         status: "y",
                         credit: 3,
-                        subtype: '必修課',
+                        subtype: '',
                     },
                     {
                         className: '採訪寫作一',
                         type: '必選課',
                         status: "y",
                         credit: 3,
-                        subtype: '必選課',
+                        subtype: '',
                     },
                     {
                         className: '採訪寫作二',
                         type: '必選課',
                         status: "y",
                         credit: 3,
-                        subtype: '必選課',
+                        subtype: '',
                     },
                     {
                         className: '新聞資訊編輯',
                         type: '必選課',
                         status: "y",
                         credit: 3,
-                        subtype: '必選課',
+                        subtype: '',
                     },
                     {
                         className: '影像報導一',
                         type: '必選課',
                         status: "y",
                         credit: 3,
-                        subtype: '必選課',
+                        subtype: '',
                     },
                     {
                         className: '影像報導二',
                         type: '必選課',
                         status: "y",
                         credit: 3,
-                        subtype: '必選課',
+                        subtype: '',
                     },
                     {
                         className: "質化研究方法",
@@ -272,7 +276,7 @@
                     {
                         className: "公民新聞專題",
                         type: "選修課",
-                        status: "y",
+                        status: "n",
                         credit: 3,
                         subtype: "媒體公民意識"
                     },
@@ -512,56 +516,56 @@
                         type: "選修課",
                         status: "y",
                         credit: 3,
-                        subtype: "無"
+                        subtype: ""
                     },
                     {
                         className: "其他系所（課程3學分）2",
                         type: "選修課",
                         status: "y",
                         credit: 3,
-                        subtype: "無"
+                        subtype: ""
                     },
                     {
                         className: "其他系所（課程3學分）3",
                         type: "選修課",
                         status: "y",
                         credit: 3,
-                        subtype: "無"
+                        subtype: ""
                     },
                     {
                         className: "其他系所（課程3學分）4",
                         type: "選修課",
                         status: "y",
                         credit: 3,
-                        subtype: "無"
+                        subtype: ""
                     },
                     {
                         className: "其他系所（課程2學分）1",
                         type: "選修課",
                         status: "y",
                         credit: 2,
-                        subtype: "無"
+                        subtype: ""
                     },
                     {
                         className: "其他系所（課程2學分）2",
                         type: "選修課",
                         status: "y",
                         credit: 2,
-                        subtype: "無"
+                        subtype: ""
                     },
                     {
                         className: "其他系所（課程2學分）3",
                         type: "選修課",
                         status: "y",
                         credit: 2,
-                        subtype: "無"
+                        subtype: ""
                     },
                     {
                         className: "其他系所（課程2學分）4",
                         type: "選修課",
                         status: "y",
                         credit: 2,
-                        subtype: "無"
+                        subtype: ""
                     }
                 ],
                 selectedCourses: [],
